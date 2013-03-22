@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+
+## Invert X colors while root window stays black.
+
+## Dependencies:
+##     xcalib
+##     xsetroot
+##     single_instance script
+
+NAME=$(basename $0)
+source ~/bin/single_instance
+
+X_SOCKETS=/tmp/.X11-unix/X
+for x in  $X_SOCKETS*; do
+    disp=":${x#$X_SOCKETS}"
+    is_normal=$(xcalib -invert -alter -verbose -display $disp \
+        | head -1 | cut -d ' ' -f3)
+done
+
+if (( $is_normal )); then
+    xsetroot -solid black
+else
+    # we're inverted now, so white is actually black.
+    xsetroot -solid white
+fi
+
+exit 0
