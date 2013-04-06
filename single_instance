@@ -1,0 +1,25 @@
+## Not perfect, works most of the time.
+## Undefined behaviour if the instance has died without removing lock.
+
+# set -e
+# echo $NAME
+# if [[ "$NAME" == "" ]]; then
+#     exit 1
+# fi
+
+LOCK_DIR=/tmp/$NAME.lock
+PID_FILE=$LOCK_DIR/pid
+
+if ! mkdir $LOCK_DIR 2>/dev/null; then
+    # Failed to make dir, probably the script is already running.
+    # However, it may have died and left the lock dir behind.
+    # Here we check that.
+    # kill -0 $(cat $PID_FILE) 2>/dev/null;
+    # if (( $? == 0 )); then
+        # yep, it's running still.
+        exit 1
+    # fi
+fi
+trap "rm -r $LOCK_DIR; exit" INT TERM EXIT QUIT HUP
+echo $$ > $PID_FILE
+
