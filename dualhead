@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Toggle dualhead.
+# Guide: http://zachstechnotes.blogspot.no/2012/04/post-title.html
+# Hints for this script:  http://blog.gordin.de/post/optimus-guide
+#
+#
+# Requirements:
+#   bumblebee (https://github.com/Bumblebee-Project)
+#   primus
+#   screenclone (https://github.com/liskin/hybrid-screenclone)
+#   intel driver patch (https://github.com/liskin/patches/blob/master/hacks/xserver-xorg-video-intel-2.20.2_virtual_crtc.patch)
+
+# The nvidia driver seems to have trouble with reading (some) EDIDs.
+# I had to manually extract it using a different computer, and specify
+# that file as a customEDI in xorg.conf.nvidia.
+
+# Ensure a single running instance of this script
+# NAME=$(basename $0)
+# source ~/bin/single_instance
+
+# external monitor screen size
+X=1920
+Y=1200
+
+LOCK="$HOME/.dualhead.lock"
+
+
+
+if [[ -e $LOCK ]]; then
+    pid=`cat "$LOCK"`
+    [[ -n $pid ]] && kill -CONT $pid
+else
+    echo -n $$ > "$LOCK"
+
+    modeline=`cvt $X $Y | sed "1d" | sed 's/Modeline //'`
+    modename=`echo $modeline | sed 's/ .*//'`
+
+    # Add the appropriate mode, it simply fails if it is already there.
+    xrandr --newmode $modeline &> /dev/null 2>&1
+    xrandr --addmode VIRTUAL1 $modename
+
+    # ... and activate it, extending the X display:
+    xrandr --output LVDS1 --auto --output VIRTUAL1 --mode $modename \
+           --right-of LVDS1
+
+    trap "xrandr --output VIRTUAL1 --off; \
+          killall screenclone; \
+          rm $LOCK" \
+         INT TERM EXIT QUIT HUP
+
+    # `primusrun` starts the X server (default display :8) if it is not running.
+    # We use it for launching screenclone to avoid having to set
+    # KeepUnusedXServer in bumblebee.conf
+    # `screenclone` clones the virtual display (xinerama display) over to the
+    # new X server.
+    primusrun \
+        $HOME/bin/glxcontext bash -c "xset -display :8 -dpms && \
+                                      xset -display :8 s off && \
+                                      screenclone -d :8 -x 1" &
+    kill -STOP "$$"
+    exit
+fi
