@@ -1,9 +1,9 @@
-/* glXContext
+/* withglxcontext
  *
  * Create a simple glX context, and execute the argument.
- * Destoys the context when the child exits.
+ * Destoy the context when the child exits.
  *
- * compile: c++ -o glxcontext glxcontext.cpp -lGL -lX11
+ * compile: c++ -o withglxcontext withglxcontext.cpp -lGL -lX11
  *
  */
 

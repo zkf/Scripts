@@ -28,8 +28,7 @@ LOCK="$HOME/.dualhead.lock"
 
 
 if [[ -e $LOCK ]]; then
-    pid=`cat "$LOCK"`
-    [[ -n $pid ]] && kill -CONT $pid
+    killall screenclone
 else
     echo -n $$ > "$LOCK"
 
@@ -55,9 +54,8 @@ else
     # `screenclone` clones the virtual display (xinerama display) over to the
     # new X server.
     primusrun \
-        $HOME/bin/glxcontext bash -c "xset -display :8 -dpms && \
-                                      xset -display :8 s off && \
-                                      screenclone -d :8 -x 1" &
-    kill -STOP "$$"
+        $HOME/bin/withglxcontext bash -c "xset -display :8 -dpms && \
+                                          xset -display :8 s off && \
+                                          screenclone -d :8 -x 1"
     exit
 fi
