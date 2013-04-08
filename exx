@@ -45,13 +45,10 @@ else
     # zsocket -d 5 /run/bumblebee.socket
     # echo -n "F" >&5 && read -u5 && print $REPLY
 
-    export LD_LIBRARY_PATH=/usr/lib/nvidia-bumblebee:/usr/lib32/nvidia-bumblebee:
+    export LD_LIBRARY_PATH=/usr/lib/nvidia:/usr/lib32/nvidia:
     xinit $BIN $@ -- /usr/lib/systemd/systemd-multi-seat-x :1 -ac \
         -config xorg.conf.nvidia.separate-x -nolisten tcp -sharevts -novtswitch
     # sleep 1
     # DISPLAY=:1 xset -dpms
     # DISPLAY=:1 xset s off
 fi
-
-echo "Finished script"
-
