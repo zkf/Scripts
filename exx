@@ -1,15 +1,4 @@
 #!/usr/bin/env zsh
-#
-## TODO: avoid using sudo, by leveraging bumblebeed / bbswitch:
-# zmodload zsh/net/socket
-# zsocket /run/bumblebee.socket -d 3
-## turn ON card and load module
-# echo -n "C" >&3
-## turn OFF card and unload module
-# echo -n "D" >&3
-#
-## Modify start_secondary so that it does not start X.
-
 
 INTERNAL=false
 
@@ -27,27 +16,9 @@ then
     xinit $BIN $@ -- /usr/lib/systemd/systemd-multi-seat-x :1 -ac \
         -nolisten tcp &> /dev/null
 else
-    if [[ -z $(lsmod | grep nvidia) ]]
-    then
-        echo "==> Nvidia driver is not loaded."
-        echo "==> Loading driver."
-        sudo modprobe nvidia
-    fi
-
-    if [[ -z $(grep ON /proc/acpi/bbswitch) ]]
-    then
-        echo "==> External video card is not enabled."
-        echo "==> Enabling external video card."
-        sudo tee /proc/acpi/bbswitch <<< ON
-    fi
-    # typeset REPLY
-    # zmodload zsh/net/socket
-    # zsocket -d 5 /run/bumblebee.socket
-    # echo -n "F" >&5 && read -u5 && print $REPLY
-
-    export LD_LIBRARY_PATH=/usr/lib/nvidia:/usr/lib32/nvidia:
-    xinit $BIN $@ -- /usr/lib/systemd/systemd-multi-seat-x :1 -ac \
-        -config xorg.conf.nvidia.separate-x -nolisten tcp -sharevts -novtswitch
+    optirun --no-xorg xinit $BIN $@ -- /usr/lib/systemd/systemd-multi-seat-x \
+        :1 -ac -config xorg.conf.nvidia.separate-x -nolisten tcp -sharevts \
+        -novtswitch
     # sleep 1
     # DISPLAY=:1 xset -dpms
     # DISPLAY=:1 xset s off
