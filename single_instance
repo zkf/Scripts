@@ -6,6 +6,9 @@
 # if [[ "$NAME" == "" ]]; then
 #     exit 1
 # fi
+#
+
+NAME=$1
 
 LOCK_DIR=/tmp/$NAME.lock
 PID_FILE=$LOCK_DIR/pid
