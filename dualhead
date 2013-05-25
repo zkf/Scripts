@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 # Toggle dualhead.
 # Guide: http://zachstechnotes.blogspot.no/2012/04/post-title.html
@@ -47,6 +47,21 @@ else
           killall screenclone; \
           rm $LOCK" \
          INT TERM EXIT QUIT HUP
+
+    ## In a forking subshell, wait for the secondary X server to appear.
+    ## Then, if the primary screen is inverted, invert the secondary too.
+    (
+        set -x;
+        while [[ ! -e /tmp/.X11-unix/X8 ]]; do
+            sleep 0.2
+        done
+
+        is_normal=$(xcalib -n 256 -invert -alter -verbose -display :0 \
+            | head -1 | cut -d ' ' -f3)
+        if (( $is_normal )); then
+            xcalib -invert -alter -verbose -display :8
+        fi
+    ) &
 
     # `primusrun` starts the X server (default display :8) if it is not running.
     # We use it for launching screenclone to avoid having to set
