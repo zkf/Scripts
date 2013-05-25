@@ -7,21 +7,26 @@
 ##     xsetroot
 ##     single_instance script
 
-NAME=$(basename $0)
-source ~/bin/single_instance
+source ~/bin/single_instance $(basename $0)
 
-X_SOCKETS=/tmp/.X11-unix/X
-for x in  $X_SOCKETS*; do
-    disp=":${x#$X_SOCKETS}"
-    is_normal=$(xcalib -invert -alter -verbose -display $disp \
+SOCKET_PATH=/tmp/.X11-unix/X
+X_SOCKETS=($SOCKET_PATH*)
+
+disp=":${X_SOCKETS[1]#$SOCKET_PATH}"
+is_normal=$(xcalib -n 256 -invert -alter -verbose -display $disp \
         | head -1 | cut -d ' ' -f3)
+
+for x in  $X_SOCKETS; do
+    disp=":${x#$SOCKET_PATH}"
+    xcalib -invert -alter -verbose -display $disp &
 done
 
 if (( $is_normal )); then
-    xsetroot -solid black
+    feh --bg-tile ~/bin/black.png
 else
     # we're inverted now, so white is actually black.
-    xsetroot -solid white
+    feh --bg-tile ~/bin/white.png
 fi
+
 
 exit 0
