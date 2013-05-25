@@ -1,8 +1,11 @@
 #!/usr/bin/env zsh
 
-LD_PRELOAD="/opt/df_linux/hack/libdfhack-client.so:/opt/df_linux/hack/libprotobuf-lite.so" /opt/df_linux/soundsense/soundSense.sh &>/dev/null &
-SS_PID=$!
-pgrep -P $$
-/opt/df_linux/dfhack
-echo $SS_PID
-kill $SS_PID
+exx sleep 99999999999999 &
+
+# export LD_PRELOAD="/opt/df_linux/hack/libdfhack-client.so:/opt/df_linux/hack/libprotobuf-lite.so"
+/opt/df_linux/soundsense/soundSense.sh &>/dev/null &
+sleep 2
+DISPLAY=:1 /opt/df_linux/dfhack
+
+sleep 0.5
+kill -- -$(ps opgid=$$)
