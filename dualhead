@@ -20,11 +20,11 @@
 # source ~/bin/single_instance
 
 # external monitor screen size
+
 X=1920
 Y=1200
 
 LOCK="$HOME/.dualhead.lock"
-
 
 
 if [[ -e $LOCK ]]; then
@@ -32,7 +32,7 @@ if [[ -e $LOCK ]]; then
 else
     echo -n $$ > "$LOCK"
 
-    modeline=`cvt $X $Y | sed "1d" | sed 's/Modeline //'`
+    modeline=`cvt $X $Y | sed "1d" | sed 's/Modeline //' | sed 's/"//g'`
     modename=`echo $modeline | sed 's/ .*//'`
 
     # Add the appropriate mode, it simply fails if it is already there.
@@ -51,7 +51,6 @@ else
     ## In a forking subshell, wait for the secondary X server to appear.
     ## Then, if the primary screen is inverted, invert the secondary too.
     (
-        set -x;
         while [[ ! -e /tmp/.X11-unix/X8 ]]; do
             sleep 0.2
         done
