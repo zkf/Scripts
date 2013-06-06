@@ -32,11 +32,11 @@ if [[ -e $LOCK ]]; then
 else
     echo -n $$ > "$LOCK"
 
-    modeline=`cvt $X $Y | sed "1d" | sed 's/Modeline //' | sed 's/"//g'`
-    modename=`echo $modeline | sed 's/ .*//'`
+    modeline=$(cvt $X $Y | sed '1d' | sed 's/Modeline //' | sed 's/"//g')
+    modename=$(echo $modeline | sed 's/ .*//')
 
     # Add the appropriate mode, it simply fails if it is already there.
-    xrandr --newmode $modeline &> /dev/null 2>&1
+    xrandr --newmode $=modeline &> /dev/null 2>&1
     xrandr --addmode VIRTUAL1 $modename
 
     # ... and activate it, extending the X display:
