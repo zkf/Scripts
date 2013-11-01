@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+# exec > /tmp/dualhead.log 2>&1
+# set -x
+
 # Toggle dualhead.
 # Guide: http://zachstechnotes.blogspot.no/2012/04/post-title.html
 # Hints for this script:  http://blog.gordin.de/post/optimus-guide
@@ -20,11 +23,12 @@
 # source ~/bin/single_instance
 
 # external monitor screen size
-
 X=1920
 Y=1200
 
-LOCK="$HOME/.dualhead.lock"
+DISP=:8
+
+LOCK="/tmp/dualhead.lock"
 
 
 if [[ -e $LOCK ]]; then
@@ -43,10 +47,6 @@ else
     xrandr --output LVDS1 --auto --output VIRTUAL1 --mode $modename \
            --right-of LVDS1
 
-    trap "xrandr --output VIRTUAL1 --off; \
-          killall screenclone; \
-          rm $LOCK" \
-         INT TERM EXIT QUIT HUP
 
     ## In a forking subshell, wait for the secondary X server to appear.
     ## Then, if the primary screen is inverted, invert the secondary too.
@@ -58,9 +58,17 @@ else
         is_normal=$(xcalib -n 256 -invert -alter -verbose -display :0 \
             | head -1 | cut -d ' ' -f3)
         if (( $is_normal )); then
-            xcalib -invert -alter -verbose -display :8
+            xcalib -invert -alter -verbose -display $DISP
         fi
+
+        export DISPLAY=$DISP
+        redshift -l 43.552654:7.018003 -t 6500:4200 -b 1.0:0.45
     ) &
+    trap "kill $!; \
+          xrandr --output VIRTUAL1 --off; \
+          killall screenclone; \
+          rm $LOCK" \
+         INT TERM EXIT QUIT HUP
 
     # `primusrun` starts the X server (default display :8) if it is not running.
     # We use it for launching screenclone to avoid having to set
@@ -68,8 +76,8 @@ else
     # `screenclone` clones the virtual display (xinerama display) over to the
     # new X server.
     primusrun \
-        $HOME/bin/withglxcontext bash -c "xset -display :8 -dpms && \
-                                          xset -display :8 s off && \
-                                          screenclone -d :8 -x 1"
+        $HOME/bin/withglxcontext bash -c "xset -display  $DISP -dpms && \
+                                          xset -display  $DISP s off && \
+                                          screenclone -d $DISP -x 1"
     exit
 fi
